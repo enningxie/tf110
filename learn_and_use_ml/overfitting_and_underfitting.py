@@ -46,11 +46,124 @@ baseline_model.compile(
 
 baseline_model.summary()
 
+print('baseline_model start.')
+
 baseline_model.fit(
     train_data,
     train_labels,
     epochs=20,
     batch_size=512,
     validation_data=(test_data, test_labels),
-    verbose=0
+    verbose=1
 )
+
+# create a smaller model
+smaller_model = keras.Sequential([
+    keras.layers.Dense(4, activation=tf.nn.relu, input_shape=(NUM_WORDS,)),
+    keras.layers.Dense(4, activation=tf.nn.relu),
+    keras.layers.Dense(1, activation=tf.nn.sigmoid)
+])
+
+smaller_model.compile(
+    optimizer=tf.train.AdamOptimizer(0.001),
+    loss=keras.losses.binary_crossentropy,
+    metrics=[keras.metrics.binary_accuracy]
+)
+
+smaller_model.summary()
+
+print('smaller_model start.')
+
+smaller_model.fit(
+    train_data,
+    train_labels,
+    epochs=20,
+    batch_size=512,
+    validation_data=(test_data, test_labels),
+    verbose=1
+)
+
+# create a bigger model
+bigger_model = keras.Sequential([
+    keras.layers.Dense(512, activation=tf.nn.relu, input_shape=(NUM_WORDS,)),
+    keras.layers.Dense(512, activation=tf.nn.relu),
+    keras.layers.Dense(1, activation=tf.nn.sigmoid)
+])
+
+bigger_model.compile(
+    optimizer=tf.train.AdamOptimizer(0.001),
+    loss=keras.losses.binary_crossentropy,
+    metrics=[keras.metrics.binary_accuracy]
+)
+
+bigger_model.summary()
+
+print('bigger_model start.')
+
+bigger_model.fit(
+    train_data,
+    train_labels,
+    epochs=20,
+    batch_size=512,
+    validation_data=(test_data, test_labels),
+    verbose=1
+)
+
+# remember: a lower validation loss indicates a better model
+# simpler models are less likely to overfit than complex ones.
+
+# add weight regularization
+l2_model = keras.Sequential([
+    keras.layers.Dense(16, kernel_regularizer=keras.regularizers.l2(0.001),
+                       activation=tf.nn.relu, input_shape=(NUM_WORDS,)),
+    keras.layers.Dense(16, kernel_regularizer=keras.regularizers.l2(0.001),
+                       activation=tf.nn.relu),
+    keras.layers.Dense(1, activation=tf.nn.sigmoid)
+])
+
+l2_model.compile(optimizer=tf.train.AdamOptimizer(0.001),
+                 loss=keras.losses.binary_crossentropy,
+                 metrics=[keras.metrics.binary_accuracy])
+
+print('l2_model start.')
+
+l2_model.fit(train_data, train_labels,
+             epochs=20,
+             batch_size=512,
+             validation_data=(test_data, test_labels),
+             verbose=1)
+
+# add dropout
+dpt_model = keras.Sequential([
+    keras.layers.Dense(16, activation=tf.nn.relu, input_shape=(NUM_WORDS,)),
+    keras.layers.Dropout(0.5),
+    keras.layers.Dense(16, activation=tf.nn.relu),
+    keras.layers.Dropout(0.5),
+    keras.layers.Dense(1, activation=tf.nn.sigmoid)
+])
+
+dpt_model.compile(
+    optimizer=tf.train.AdamOptimizer(0.001),
+    loss=keras.losses.binary_crossentropy,
+    metrics=[keras.metrics.binary_accuracy]
+)
+
+print('dpt_model start.')
+
+dpt_model.fit(
+    train_data,
+    train_labels,
+    epochs=20,
+    batch_size=512,
+    validation_data=(test_data, test_labels),
+    verbose=1
+)
+
+
+# conclusion:
+# here the most common ways to prevent overfitting in neural networks:
+# 1. Get more training data.
+# 2. Reduce the capacity of the network.
+# 3. Add weight regularization.
+# 4. Add dropout.
+# 5. data-augmentation and batch normalization.
